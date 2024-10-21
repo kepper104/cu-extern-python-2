@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Weather Quality Check</title>
+    <style>
+        body {
+            background: linear-gradient(to bottom, #0072ff, #00c6ff);
+        }
+    </style>
+
+</head>
+<body>
+<div class="flex justify-center items-center h-screen  flex-col p-10">
+    <div class="flex justify-center items-center flex-col flex-1 w-full">
+        <h1 class="text-5xl font-bold text-center mb-10 text-white">Погодо-Проверятель-3000</h1>
+        <div class="flex flex-row justify-around w-full">
+            <div class="flex flex-col justify-center items-end">
+                <div class="bg-white py-10 rounded-3xl shadow-md px-32">
+                    <label for="orig-city-select" class="block text-lg font-medium text-gray-700">Откуда едем?</label>
+                    <select id="orig-city-select" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                      {% for city in cities.keys() %}
+        <option value="{{ city }}" {% if city == "Москва" %}selected{% endif %}>{{ city }}</option>
+                      {% endfor %}
+                    </select>
+
+                    <div class="flex justify-center items-center my-4">
+                        <span class="text-gray-500 text-sm font-semibold">или</span>
+                    </div>
+
+                    <label for="orig-latitude" class="block text-sm font-medium text-gray-700">Широта:</label>
+                    <input type="text" id="orig-latitude" name="latitude" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Введите широту">
+
+                    <label for="orig-longitude" class="block text-sm font-medium text-gray-700 mt-4">Долгота:</label>
+                    <input type="text" id="orig-longitude" name="longitude" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Введите долготу">
+                </div>
+
+            </div>
+
+        <div class="flex flex-col justify-center items-center">
+            <img src="/static/wavy_arrow.png" alt="Wavy arrow" class="w-[500px] h-[100px] my-auto">
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">Проверить</button>
+        </div>
+
+            <div class="flex flex-col justify-center">
+
+                <div class="bg-white rounded-3xl shadow-md py-10 px-32">
+                    <label for="dest-city-select" class="block text-lg font-medium text-gray-700">Куда едем?</label>
+                    <select id="dest-city-select" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        {% for city in cities.keys() %}
+                        <option value="{{ city }}" {% if city == "Москва" %}selected{% endif %}>{{ city }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <div class="flex justify-center items-center my-4">
+                        <span class="text-gray-500 text-sm font-semibold">или</span>
+                    </div>
+
+                    <label for="dest-latitude" class="block text-sm font-medium text-gray-700">Широта:</label>
+                    <input type="text" id="dest-latitude" name="latitude" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Введите широту">
+
+                    <label for="dest-longitude" class="block text-sm font-medium text-gray-700 mt-4">Долгота:</label>
+                    <input type="text" id="dest-longitude" name="longitude" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Введите долготу">
+                </div>
+            </div>
+        </div>
+    </div>
+{#    <div class="flex flex-1 justify-center items-center">#}
+{#        <h1 class="text-3xl font-bold text-center">Check Weather Quality</h1>#}
+{#        <form method="POST" action="/">#}
+{#            <label for="latitude">Enter Latitude:</label>#}
+{#            <input type="text" id="latitude" name="latitude" required>#}
+{#            <br><br>#}
+{#            <label for="longitude">Enter Longitude:</label>#}
+{#            <input type="text" id="longitude" name="longitude" required>#}
+{#            <br><br>#}
+{#            <button type="submit">Check Weather</button>#}
+{#        </form>#}
+{#    </div>#}
+
+</div>
+
+    {% if error %}
+        <h2 style="color:red;">Error: {{ error }}</h2>
+    {% elif weather_model %}
+        <h3>Weather Details:</h3>
+        <p>Temperature: {{ weather_model.current_temperature }} °C</p>
+        <p>Humidity: {{ weather_model.current_humidity }} %</p>
+        <p>Wind Speed: {{ weather_model.current_wind_speed }} m/s</p>
+        <p>Precipitation Probability: {{ weather_model.current_precipitation_probability }} %</p>
+
+        {% if bad_weather %}
+            <h2 style="color:red;">The weather is bad!</h2>
+        {% else %}
+            <h2 style="color:green;">The weather is good!</h2>
+        {% endif %}
+    {% endif %}
+</body>
+  <script>
+    const citiesWithCoordinates = {{ cities | tojson }};
+
+    function configureCitySelect(str) {
+        const citySelect = document.getElementById(`${str}-city-select`);
+
+        const defaultCity = "Москва";
+        if (citiesWithCoordinates[defaultCity]) {
+          const [latitude, longitude] = citiesWithCoordinates[defaultCity];
+          document.getElementById(`${str}-latitude`).value = latitude;
+          document.getElementById(`${str}-longitude`).value = longitude;
+        }
+
+        citySelect.addEventListener('change', function() {
+          const selectedCity = citySelect.value;
+          console.log(`${str} city selected:`, selectedCity);
+
+
+          if (selectedCity && citiesWithCoordinates[selectedCity]) {
+            const [latitude, longitude] = citiesWithCoordinates[selectedCity];
+            document.getElementById(`${str}-latitude`).value = latitude;
+            document.getElementById(`${str}-longitude`).value = longitude;
+          } else {
+            document.getElementById(`${str}-latitude`).value = '';
+            document.getElementById(`${str}longitude`).value = '';
+          }
+        });
+    }
+    configureCitySelect("orig");
+    configureCitySelect("dest");
+
+  </script>
+</html>
