@@ -6,8 +6,7 @@ from weather_model import WeatherModel
 class TestCheckBadWeather(unittest.TestCase):
 
     def setUp(self):
-        # Set up a WeatherModel instance for testing
-        self.weather_model = WeatherModel(55.768740, 37.588835)
+        self.weather_model = WeatherModel(0, 0)
 
     def test_good_weather(self):
         """Test when all weather conditions are within the comfortable range."""
