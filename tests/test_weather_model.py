@@ -1,6 +1,6 @@
 import unittest
 
-from weather_model import WeatherModel
+from models.weather_model import WeatherModel
 
 
 class TestCheckBadWeather(unittest.TestCase):

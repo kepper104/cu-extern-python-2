@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from weather_model import WeatherModel, ping_weather_api, ping_internet
+from models.weather_model import WeatherModel, ping_weather_api, ping_internet
 
 most_populous_cities_with_coordinates = {
     "Москва": (55.7558, 37.6172),
