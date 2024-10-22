@@ -7,9 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <title>Погодо-Проверятель-3000</title>
     <style>
+        {# A cool gradient background for the page #}
         body {
             background: linear-gradient(to bottom, #0072ff, #00c6ff);
         }
+
+
+        {# Relative positioning chicanery for the sun image #}
 
         .page-container {
             position: relative;
@@ -29,48 +33,65 @@
 <body>
 <div class="page-container relative">
 
-    <div class="flex justify-center items-center h-screen  flex-col p-10">
+    <div class="flex justify-center items-center h-screen flex-col p-8 pb-1">
+        <h1 class="text-5xl font-bold text-center text-white mb-4">Погодо-Проверятель-3000</h1>
+
         <div class="flex justify-center items-center flex-col flex-1 w-full">
-            <h1 class="text-5xl font-bold text-center mb-10 text-white">Погодо-Проверятель-3000</h1>
             <form action="/" method="POST" class="flex flex-row justify-around items-center w-full">
 
-                <div class="bg-white py-10 rounded-3xl shadow-md px-8 lg:px-32">
+                <div class="bg-white py-6 rounded-3xl shadow-md px-4 lg:px-24">
                     <label for="orig-city-select" class="block text-xl font-semibold text-gray-700 mb-2">Откуда
                         едем?</label>
 
-                    <div class="relative">
+                    <div class="">
                         <select id="orig-city-select" name="orig-city"
                                 class="mt-1 block w-full py-3 px-4 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base">
                             {% for city in cities.keys() %}
                                 <option value="{{ city }}"
-                                        {% if city == "Москва" %}selected{% endif %}>{{ city }}</option>
+                                        {% if city == "Москва" %}selected{% endif %}>{{ city }}
+                                </option>
                             {% endfor %}
+                            <option value="CitySearch"> -- Найти город...</option>
+
                         </select>
+                        <div id="orig-city-search" class="mt-3" hidden>
+                            <label for="orig-city-search-input">Название Города</label>
+                            <input type="text" placeholder="Искомый город" id="orig-city-search-input"
+                                   name="orig-city-search-input"
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base">
+                        </div>
 
                     </div>
 
-                    <div class="flex justify-center items-center my-6">
+                    <div class="flex justify-center items-center my-4">
                         <span class="bg-gray-200 h-px flex-1"></span>
                         <span class="text-gray-500 px-4 text-sm font-semibold">или</span>
                         <span class="bg-gray-200 h-px flex-1"></span>
                     </div>
 
-                    <label for="orig-latitude" class="block text-sm font-medium text-gray-700 mb-1">Широта:</label>
-                    <input type="text" id="orig-latitude" name="orig-latitude"
-                           class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
-                           placeholder="Введите широту">
+                    <div class="flex flex-row justify-around items-center gap-3">
+                        <div class="flex flex-col">
+                            <label for="orig-latitude"
+                                   class="block text-sm font-medium text-gray-700 mb-1">Широта</label>
+                            <input type="text" id="orig-latitude" name="orig-latitude"
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
+                                   placeholder="Введите широту">
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="orig-longitude"
+                                   class="block text-sm font-medium text-gray-700 mb-1">Долгота</label>
+                            <input type="text" id="orig-longitude" name="orig-longitude"
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
+                                   placeholder="Введите долготу">
+                        </div>
 
-                    <label for="orig-longitude"
-                           class="block text-sm font-medium text-gray-700 mt-4 mb-1">Долгота:</label>
-                    <input type="text" id="orig-longitude" name="orig-longitude"
-                           class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
-                           placeholder="Введите долготу">
+                    </div>
                 </div>
 
 
                 <div class="flex flex-col justify-center items-center">
-                    <img src="/static/wavy_arrow.png" alt="Wavy arrow" class="w-[500px] h-[100px] my-auto">
-                    <button class="bg-white hover:bg-gray-200 text-black text-2xl font-bold rounded-full mt-16 py-8 px-20 disabled:bg-red-700 disabled:text-white"
+                    <img src="/static/wavy_arrow.png" alt="Wavy arrow" class="w-[300px] h-[100px] my-auto">
+                    <button class="bg-white hover:bg-gray-200 text-black text-2xl font-bold rounded-full mt-16 py-4 px-16 disabled:bg-red-700 disabled:text-white"
                             type="submit"
                             id="submit-button"
 
@@ -79,7 +100,7 @@
                 </div>
 
 
-                <div class="bg-white py-10 rounded-3xl shadow-md px-8 lg:px-32">
+                <div class="bg-white py-6 rounded-3xl shadow-md px-4 lg:px-24">
                     <label for="dest-city-select" class="block text-xl font-semibold text-gray-700 mb-2">Куда
                         едем?</label>
 
@@ -90,28 +111,40 @@
                                 <option value="{{ city }}"
                                         {% if city == "Москва" %}selected{% endif %}>{{ city }}</option>
                             {% endfor %}
+                            <option value="CitySearch"> -- Найти город...</option>
                         </select>
+                        <div id="dest-city-search" class="mt-3" hidden>
+                            <label for="dest-city-search-input">Название Города</label>
+                            <input type="text" placeholder="Искомый город" id="dest-city-search-input"
+                                   name="dest-city-search-input"
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base">
+                        </div>
 
                     </div>
 
-                    <div class="flex justify-center items-center my-6">
+                    <div class="flex justify-center items-center my-4">
                         <span class="bg-gray-200 h-px flex-1"></span>
                         <span class="text-gray-500 px-4 text-sm font-semibold">или</span>
                         <span class="bg-gray-200 h-px flex-1"></span>
                     </div>
 
-                    <label for="dest-latitude" class="block text-sm font-medium text-gray-700 mb-1">Широта:</label>
-                    <input type="text" id="dest-latitude" name="dest-latitude"
-                           class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
-                           placeholder="Введите широту">
-
-                    <label for="dest-longitude"
-                           class="block text-sm font-medium text-gray-700 mt-4 mb-1">Долгота:</label>
-                    <input type="text" id="dest-longitude" name="dest-longitude"
-                           class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
-                           placeholder="Введите долготу">
+                    <div class="flex flex-row justify-around items-center gap-3">
+                        <div class="flex flex-col">
+                            <label for="dest-latitude"
+                                   class="block text-sm font-medium text-gray-700 mb-1">Широта</label>
+                            <input type="text" id="dest-latitude" name="dest-latitude"
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
+                                   placeholder="Введите широту">
+                        </div>
+                        <div class="flex flex-col">
+                            <label for="dest-longitude"
+                                   class="block text-sm font-medium text-gray-700 mb-1">Долгота</label>
+                            <input type="text" id="dest-longitude" name="dest-longitude"
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
+                                   placeholder="Введите долготу">
+                        </div>
+                    </div>
                 </div>
-
             </form>
         </div>
 
@@ -120,7 +153,8 @@
                 <div class="flex flex-1 flex-col text-white items-center bg-opacity-70 bg-blue-500 rounded-lg shadow-lg p-6 mx-20"
                      style="backdrop-filter: blur(10px);">
                     {% if origin_weather_error %}
-                        <h2 class="text-2xl font-semibold text-red-800">{% if origin_weather_error['reason'] %} {{ origin_weather_error.reason }} {% else %}  {{ origin_weather_error }} {% endif %}</h2>
+                        <h2 class="text-2xl font-semibold text-red-800">{% if origin_weather_error['reason'] %}
+                            {{ origin_weather_error.reason }} {% else %}  {{ origin_weather_error }} {% endif %}</h2>
                     {% elif origin_weather %}
                         <h2 class="text-4xl font-bold mb-5">Погода в месте отправления</h2>
 
@@ -175,54 +209,142 @@
                 </div>
             </div>
         {% endif %}
+        <a href="https://www.flaticon.com/free-icons/summer" title="summer icons" class="text-white mr-auto text-sm">Summer
+            icons created by Freepik - Flaticon</a>
+        <div class="flex w-full flex-row justify-between">
+            <a href="https://www.flaticon.com/free-icons/clear-sky" title="clear sky icons" class="text-white text-sm">Clear
+                sky icons created by kosonicon - Flaticon</a>
+            <div class="text-white">Сайт адаптирован под 1920x1080 ;)</div>
+        </div>
+
     </div>
 
     <img src="/static/sun.png" alt="Sun" class="sun-image">
 </div>
 
-{#<a href="https://www.flaticon.com/free-icons/summer" title="summer icons">Summer icons created by Freepik - Flaticon</a>#}
-{#<a href="https://www.flaticon.com/free-icons/clear-sky" title="clear sky icons">Clear sky icons created by kosonicon - Flaticon</a>#}
 
 </body>
 
 
 <script defer>
-    const citiesWithCoordinates = {{ cities | tojson }};
 
-    const origCity = "{{ form_data.origin_city }}";
-    const origLatitude = "{{ form_data.origin_latitude }}";
-    const origLongitude = "{{ form_data.origin_longitude }}";
-    const destCity = "{{ form_data.destination_city }}";
-    const destLatitude = "{{ form_data.destination_latitude }}";
-    const destLongitude = "{{ form_data.destination_longitude }}";
+    /**
+     * Debounce function for input fields.
+     * @param fn - function to be debounced
+     * @param delay - delay in milliseconds
+     * @param args - additional arguments to be passed to the function
+     */
+    function debounce(fn, delay, ...args) {
+        let timeoutId;
+        return function (...eventArgs) {
+            if (timeoutId) clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                fn.apply(this, [...eventArgs, ...args]);
+            }, delay);
+        };
+    }
 
-    function checkCoordinatesValidity() {
+    /**
+     * Handles city search for the specified input field.
+     * @param event - event object
+     * @param str - string representing the input field
+     */
+    function handleCitySearch(event, str) {
+        const searchQuery = event.target.value;
+        if (searchQuery === '') {
+            return;
+        }
+
+        console.log('Searching for:', searchQuery);
+
+        fetch('/get_city_coordinates?city_name=' + searchQuery)
+            .then(response => response.json())
+            .then(data => {
+                console.log('Received coordinates:', data);
+
+                document.getElementById(`${str}-latitude`).value = data[0];
+                document.getElementById(`${str}-longitude`).value = data[1];
+
+                document.getElementById(`${str}-city-search-input`).className = "block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base";
+
+
+                checkCoordinatesValidity(str)
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById(`${str}-city-search-input`).className += " bg-red-500";
+            });
+    }
+
+    /**
+     * Configures city search for the specified input fields.
+     */
+    function configureCitySearch() {
+        const origCitySearchInput = document.getElementById('orig-city-search-input');
+        origCitySearchInput.addEventListener('input', debounce(handleCitySearch, 750, "orig"));
+
+        const destCitySearchInput = document.getElementById('dest-city-search-input');
+        destCitySearchInput.addEventListener('input', debounce(handleCitySearch, 750, "dest"));
+    }
+
+
+    /**
+     * Validates the coordinates entered by the user.
+     */
+    function validateCoordinates() {
         const submitButton = document.getElementById("submit-button");
         submitButton.disabled = false;
         submitButton.title = ""
 
-        if (parseFloat(document.getElementById("orig-latitude").value) < -90 ||
-            parseFloat(document.getElementById("orig-latitude").value) > 90) {
+        if (checkCoordinatesValidity('orig') && checkCoordinatesValidity('dest')) {
+            submitButton.disabled = false;
+            submitButton.title = ""
+        }
+    }
+
+    /**
+     * Checks the validity of the coordinates entered by the user in the specified input fields.
+     * @param str - string representing the input field type: "orig" or "dest"
+     * @return true if the coordinates are valid, false otherwise
+     */
+    function checkCoordinatesValidity(str) {
+        const submitButton = document.getElementById("submit-button");
+
+        if (parseFloat(document.getElementById(`${str}-latitude`).value) < -90 ||
+            parseFloat(document.getElementById(`${str}-latitude`).value) > 90 || document.getElementById(`${str}-latitude`).value === "") {
             submitButton.disabled = true;
             submitButton.title = "Неверные координаты места отправления"
-        }
-        else if (parseFloat(document.getElementById("orig-longitude").value) < -180 ||
-            parseFloat(document.getElementById("orig-longitude").value) > 180) {
+        } else if (parseFloat(document.getElementById(`${str}-longitude`).value) < -180 ||
+            parseFloat(document.getElementById(`${str}-longitude`).value) > 180 || document.getElementById(`${str}-longitude`).value === "") {
             submitButton.disabled = true;
             submitButton.title = "Неверные координаты места назначения"
-        }
-        else {
-            submitButton.disabled = false;
+        } else {
+            return true;
         }
 
     }
 
 
-    function configureCitySelect(str, selectedCity, latitude, longitude) {
+    /**
+     * Configures the city select for the specified input field.
+     * @param str - string representing the input field
+     * @param selectedCity - selected city
+     * @param latitude - latitude of the selected city
+     * @param longitude - longitude of the selected city
+     * @param searchedCity - searched city
+     */
+    function configureCitySelect(str, selectedCity, latitude, longitude, searchedCity) {
         const citySelect = document.getElementById(`${str}-city-select`);
 
-        if (selectedCity && citiesWithCoordinates[selectedCity]) {
-            console.log("Setting retrieved data", selectedCity, citiesWithCoordinates[selectedCity]);
+        if (selectedCity === "CitySearch") {
+            const citySearch = document.getElementById(`${str}-city-search`);
+
+            citySearch.hidden = false;
+            document.getElementById(`${str}-city-select`).value = selectedCity;
+            document.getElementById(`${str}-city-search-input`).value = searchedCity;
+            document.getElementById(`${str}-latitude`).value = latitude;
+            document.getElementById(`${str}-longitude`).value = longitude;
+        } else if (selectedCity && citiesWithCoordinates[selectedCity]) {
             document.getElementById(`${str}-city-select`).value = selectedCity;
             document.getElementById(`${str}-latitude`).value = latitude;
             document.getElementById(`${str}-longitude`).value = longitude;
@@ -235,19 +357,29 @@
 
         citySelect.addEventListener('change', function () {
             const selectedCity = citySelect.value;
-            if (selectedCity && citiesWithCoordinates[selectedCity]) {
-                const [latitude, longitude] = citiesWithCoordinates[selectedCity];
-                document.getElementById(`${str}-latitude`).value = latitude;
-                document.getElementById(`${str}-longitude`).value = longitude;
-            } else {
+            const citySearch = document.getElementById(`${str}-city-search`);
+
+            if (selectedCity === "CitySearch") {
+                citySearch.hidden = false;
                 document.getElementById(`${str}-latitude`).value = '';
                 document.getElementById(`${str}-longitude`).value = '';
+
+            } else {
+                citySearch.hidden = true;
+                if (selectedCity && citiesWithCoordinates[selectedCity]) {
+                    const [latitude, longitude] = citiesWithCoordinates[selectedCity];
+                    document.getElementById(`${str}-latitude`).value = latitude;
+                    document.getElementById(`${str}-longitude`).value = longitude;
+                } else {
+                    document.getElementById(`${str}-latitude`).value = '';
+                    document.getElementById(`${str}-longitude`).value = '';
+                }
             }
+            validateCoordinates()
         });
 
 
-
-        document.getElementById(`${str}-latitude`).addEventListener('input', function (event) {
+        document.getElementById(`${str}-latitude`).addEventListener('input', function () {
             this.value = this.value.replace(/[^0-9.]/g, '');
 
             const parts = this.value.split('.');
@@ -255,9 +387,12 @@
                 this.value = parts[0] + '.' + parts[1];
             }
 
-            checkCoordinatesValidity();
+            validateCoordinates()
+
 
             citySelect.value = "Другая локация";
+            document.getElementById(`${str}-city-search`).hidden = true;
+            document.getElementById(`${str}-city-search-input`).value = "";
         });
 
         document.getElementById(`${str}-longitude`).addEventListener('input', function () {
@@ -268,13 +403,30 @@
                 this.value = parts[0] + '.' + parts[1];
             }
 
-            checkCoordinatesValidity();
+            validateCoordinates()
+
 
             citySelect.value = "Другая локация";
+            document.getElementById(`${str}-city-search`).hidden = true;
+            document.getElementById(`${str}-city-search-input`).value = "";
         });
     }
 
-    configureCitySelect("orig", origCity, origLatitude, origLongitude);
-    configureCitySelect("dest", destCity, destLatitude, destLongitude);
+
+    const citiesWithCoordinates = {{ cities | tojson }};
+
+    const origCity = "{{ form_data.origin_city }}";
+    const origSearchedCity = "{{ form_data.origin_searched_city }}";
+    const origLatitude = "{{ form_data.origin_latitude }}";
+    const origLongitude = "{{ form_data.origin_longitude }}";
+    const destCity = "{{ form_data.destination_city }}";
+    const destLatitude = "{{ form_data.destination_latitude }}";
+    const destLongitude = "{{ form_data.destination_longitude }}";
+    const destSearchedCity = "{{ form_data.destination_searched_city }}";
+
+    configureCitySelect("orig", origCity, origLatitude, origLongitude, origSearchedCity);
+    configureCitySelect("dest", destCity, destLatitude, destLongitude, destSearchedCity);
+
+    configureCitySearch();
 </script>
 </html>

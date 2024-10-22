@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
+
+from models.geocoder_model import get_coordinates_of_city
 from models.weather_model import WeatherModel, ping_weather_api, ping_internet
 
 most_populous_cities_with_coordinates = {
@@ -12,19 +14,31 @@ most_populous_cities_with_coordinates = {
     "Омск": (54.9833, 73.3667),
     "Самара": (53.2028, 50.1408),
     "Ростов": (47.2225, 39.7100),
-    "Уфа": (54.7261, 55.9475),
-    "Красноярск": (56.0089, 92.8719),
-    "Воронеж": (51.6717, 39.2106),
-    "Пермь": (58.0000, 56.3167),
-    "Волгоград": (48.7086, 44.5147),
     "Другая локация": (0.0, 0.0),
 }
 
 app = Flask(__name__)
 
 
+@app.route('/get_city_coordinates')
+def get_city_coordinates():
+    """
+    Get coordinates of a city by its name.
+    :return: coordinates of the city
+    """
+
+    city_name = request.args.get('city_name')
+    coordinates = get_coordinates_of_city(city_name)
+    return jsonify(coordinates)
+
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """
+    Main page of the application.
+    :return:
+    """
+
     internet_ping_successful = ping_internet()
 
     if not internet_ping_successful:
@@ -43,9 +57,11 @@ def index():
     elif request.method == 'POST':
         try:
             origin_city = request.form.get('orig-city')
+            origin_searched_city = request.form.get('orig-city-search-input')
             origin_latitude = request.form.get('orig-latitude')
             origin_longitude = request.form.get('orig-longitude')
             destination_city = request.form.get('dest-city')
+            destination_searched_city = request.form.get('dest-city-search-input')
             destination_latitude = request.form.get('dest-latitude')
             destination_longitude = request.form.get('dest-longitude')
 
@@ -53,8 +69,12 @@ def index():
             print("Error!", e)
             return "Был сделан некорректный POST запрос. Попробуйте вернуться на <a href='/'> главную страницу </a> и повторите попытку."
 
-        return_form_data = {"origin_city": origin_city, "origin_latitude": origin_latitude, "origin_longitude": origin_longitude,
-                            "destination_city": destination_city, "destination_latitude": destination_latitude, "destination_longitude": destination_longitude}
+        return_form_data = {"origin_city": origin_city, "origin_latitude": origin_latitude,
+                            "origin_longitude": origin_longitude,
+                            "destination_city": destination_city, "destination_latitude": destination_latitude,
+                            "destination_longitude": destination_longitude,
+                            "origin_searched_city": origin_searched_city,
+                            "destination_searched_city": destination_searched_city}
 
         try:
             weather_model_origin = WeatherModel(float(origin_latitude), float(origin_longitude))
@@ -62,7 +82,7 @@ def index():
             print("Error!", e)
             return "Произошла ошибка при запросе данных о погоде, возможно,\
                     были переданы координаты в неверном формате: " + str(e)
-        
+
         try:
             weather_model_origin.get_weather()
         except Exception as e:
@@ -79,7 +99,6 @@ def index():
             weather_model_destination.get_weather()
         except Exception as e:
             print("Error!", e)
-
 
         print(weather_model_destination.error, weather_model_origin.error)
 

@@ -4,6 +4,9 @@ from models.geocoder_model import get_coordinates_of_city
 
 
 class TestGetCoordinatesOfCity(unittest.TestCase):
+    """
+    Tests the get_coordinates_of_city function.
+    """
 
     def test_valid_city(self):
         """Test that a valid city returns correct coordinates (basic test for a known city)."""

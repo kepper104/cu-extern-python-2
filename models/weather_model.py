@@ -2,6 +2,11 @@ import requests
 
 
 def ping_internet():
+    """
+    Ping the internet to check if it is available.
+    :return: True if the internet is available, False otherwise.
+    """
+
     base_url = "https://1.1.1.1"
     response = requests.get(base_url)
 
@@ -12,6 +17,11 @@ def ping_internet():
 
 
 def ping_weather_api():
+    """
+    Ping the weather API to check if it is available.
+    :return: True if the weather API is available, False otherwise.
+    """
+
     base_url = "https://api.open-meteo.com/v1/forecast?latitude=10&longitude=10"
     response = requests.get(base_url)
     if response.status_code == 200:
@@ -21,6 +31,10 @@ def ping_weather_api():
 
 
 class WeatherModel:
+    """
+    Class for weather information retrieval and processing model.
+    """
+
     def __init__(self, lat: float, lon: float,
                  min_comfortable_temperature: float = 10, max_comfortable_temperature: float = 30,
                  min_comfortable_humidity: float = 30, max_comfortable_humidity: float = 70,
@@ -46,8 +60,11 @@ class WeatherModel:
         self.weather_data = None
         self.error = None
 
-
     def get_weather(self):
+        """
+        Retrieve weather information from the weather API.
+        :return: None
+        """
         base_url = "https://api.open-meteo.com/v1/forecast"
         request_query = f'?latitude={self.lat}&longitude={self.lon}&current=temperature_2m,relative_humidity_2m,precipitation_probability,wind_speed_10m'
 
@@ -65,6 +82,12 @@ class WeatherModel:
             self.error = 'Произошла ошибка при запросе данных о погоде: ' + str(e)
 
     def store_current_weather(self, weather_data) -> None:
+        """
+        Store the current weather information in the model.
+        :param weather_data: weather data retrieved from the weather API
+        :return: None
+        """
+
         self.current_temperature = weather_data['current']['temperature_2m']
         self.current_humidity = weather_data['current']['relative_humidity_2m']
         self.current_wind_speed = weather_data['current']['wind_speed_10m']
@@ -77,13 +100,23 @@ class WeatherModel:
                                     "precipitation_probability": self.current_precipitation_probability,
                                     "is_bad_weather": is_bad_weather}
 
-    def print_weather_data(self) -> None:
+    def print_weather_data(self):
+        """
+        Print the current weather information.
+        :return: None
+        """
+
         print(f"Current temperature: {self.current_temperature} °C")
         print(f"Current humidity: {self.current_humidity} %")
         print(f"Current wind speed: {self.current_wind_speed} m/s")
         print(f"Current precipitation probability: {self.current_precipitation_probability} %")
 
-    def check_bad_weather(self) -> bool:
+    def check_bad_weather(self):
+        """
+        Check if the current weather conditions are bad.
+        :return: True if the weather conditions are bad, False otherwise.
+        """
+
         if (self.current_temperature < self.min_comfortable_temperature or
                 self.current_temperature > self.max_comfortable_temperature or
                 self.current_humidity < self.min_comfortable_humidity or
@@ -92,15 +125,3 @@ class WeatherModel:
                 self.current_precipitation_probability > self.max_precipitation_probability):
             return True
         return False
-
-
-def main():
-    weather_model = WeatherModel(55.768740, 37.588835)
-    weather_model.get_weather()
-    weather_model.print_weather_data()
-    weather_model.current_humidity = 100
-    print("Weather is bad:", weather_model.check_bad_weather())
-
-
-if __name__ == '__main__':
-    main()

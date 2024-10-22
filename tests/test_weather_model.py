@@ -4,6 +4,9 @@ from models.weather_model import WeatherModel
 
 
 class TestCheckBadWeather(unittest.TestCase):
+    """
+    Tests the check_bad_weather method of the WeatherModel class.
+    """
 
     def setUp(self):
         self.weather_model = WeatherModel(0, 0)
