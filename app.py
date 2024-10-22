@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-import requests
 from weather_model import WeatherModel
 
 most_populous_cities_with_coordinates = {
@@ -17,26 +16,49 @@ most_populous_cities_with_coordinates = {
     "Красноярск":	(56.0089,	92.8719),
     "Воронеж":	(51.6717,	39.2106),
     "Пермь":	(58.0000,	56.3167),
-    "Волгоград":	(48.7086,	44.5147)
+    "Волгоград":	(48.7086,	44.5147),
+    "Другая локация":	(0.0,	0.0),
 }
 app = Flask(__name__)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        lat = float(request.form['latitude'])
-        lon = float(request.form['longitude'])
+        print(request.form)
 
-        weather_model = WeatherModel(lat, lon)
-        weather_model.get_weather()
+        orig_city = request.form.get('orig-city')
+        orig_latitude = request.form.get('orig-latitude')
+        orig_longitude = request.form.get('orig-longitude')
+        dest_city = request.form.get('dest-city')
+        dest_latitude = request.form.get('dest-latitude')
+        dest_longitude = request.form.get('dest-longitude')
 
-        if weather_model.error:
-            return render_template('index.html', error=weather_model.error)
+        return_form_data = {"orig_city": orig_city, "orig_latitude": orig_latitude, "orig_longitude": orig_longitude,
+                            "dest_city": dest_city, "dest_latitude": dest_latitude, "dest_longitude": dest_longitude}
 
-        bad_weather = weather_model.check_bad_weather()
-        return render_template('index.html', bad_weather=bad_weather, weather_model=weather_model)
 
-    return render_template('index.html', bad_weather=None, weather_model=None, cities=most_populous_cities_with_coordinates)
+
+        weather_model_origin = WeatherModel(float(orig_latitude), float(orig_longitude))
+        try:
+            weather_model_origin.get_weather()
+        except Exception as e:
+            print("Error!", e)
+
+
+        weather_model_destination = WeatherModel(float(dest_latitude), float(dest_longitude))
+        try:
+            weather_model_destination.get_weather()
+        except Exception as e:
+            print("Error!", e)
+
+        return render_template('index.html',
+                               cities=most_populous_cities_with_coordinates,
+                               form_data=return_form_data, destination_weather = weather_model_destination.weather_data_parsed, origin_weather = weather_model_origin.weather_data_parsed, origin_weather_error=weather_model_origin.error, destination_weather_error=weather_model_destination.error)
+
+    elif request.method == "GET":
+        return render_template('index.html', cities=most_populous_cities_with_coordinates, form_data="undefined")
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -3,131 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Weather Quality Check</title>
+    <title>Погодо-Проверятель-3000</title>
     <style>
         body {
             background: linear-gradient(to bottom, #0072ff, #00c6ff);
         }
-    </style>
-
-</head>
-<body>
-<div class="flex justify-center items-center h-screen  flex-col p-10">
-    <div class="flex justify-center items-center flex-col flex-1 w-full">
-        <h1 class="text-5xl font-bold text-center mb-10 text-white">Погодо-Проверятель-3000</h1>
-        <div class="flex flex-row justify-around w-full">
-            <div class="flex flex-col justify-center items-end">
-                <div class="bg-white py-10 rounded-3xl shadow-md px-32">
-                    <label for="orig-city-select" class="block text-lg font-medium text-gray-700">Откуда едем?</label>
-                    <select id="orig-city-select" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                      {% for city in cities.keys() %}
-        <option value="{{ city }}" {% if city == "Москва" %}selected{% endif %}>{{ city }}</option>
-                      {% endfor %}
-                    </select>
-
-                    <div class="flex justify-center items-center my-4">
-                        <span class="text-gray-500 text-sm font-semibold">или</span>
-                    </div>
-
-                    <label for="orig-latitude" class="block text-sm font-medium text-gray-700">Широта:</label>
-                    <input type="text" id="orig-latitude" name="latitude" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Введите широту">
-
-                    <label for="orig-longitude" class="block text-sm font-medium text-gray-700 mt-4">Долгота:</label>
-                    <input type="text" id="orig-longitude" name="longitude" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Введите долготу">
-                </div>
-
-            </div>
-
-        <div class="flex flex-col justify-center items-center">
-            <img src="/static/wavy_arrow.png" alt="Wavy arrow" class="w-[500px] h-[100px] my-auto">
-            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">Проверить</button>
-        </div>
-
-            <div class="flex flex-col justify-center">
-
-                <div class="bg-white rounded-3xl shadow-md py-10 px-32">
-                    <label for="dest-city-select" class="block text-lg font-medium text-gray-700">Куда едем?</label>
-                    <select id="dest-city-select" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        {% for city in cities.keys() %}
-                        <option value="{{ city }}" {% if city == "Москва" %}selected{% endif %}>{{ city }}</option>
-                        {% endfor %}
-                    </select>
-
-                    <div class="flex justify-center items-center my-4">
-                        <span class="text-gray-500 text-sm font-semibold">или</span>
-                    </div>
-
-                    <label for="dest-latitude" class="block text-sm font-medium text-gray-700">Широта:</label>
-                    <input type="text" id="dest-latitude" name="latitude" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Введите широту">
-
-                    <label for="dest-longitude" class="block text-sm font-medium text-gray-700 mt-4">Долгота:</label>
-                    <input type="text" id="dest-longitude" name="longitude" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Введите долготу">
-                </div>
-            </div>
-        </div>
-    </div>
-{#    <div class="flex flex-1 justify-center items-center">#}
-{#        <h1 class="text-3xl font-bold text-center">Check Weather Quality</h1>#}
-{#        <form method="POST" action="/">#}
-{#            <label for="latitude">Enter Latitude:</label>#}
-{#            <input type="text" id="latitude" name="latitude" required>#}
-{#            <br><br>#}
-{#            <label for="longitude">Enter Longitude:</label>#}
-{#            <input type="text" id="longitude" name="longitude" required>#}
-{#            <br><br>#}
-{#            <button type="submit">Check Weather</button>#}
-{#        </form>#}
-{#    </div>#}
-
-</div>
-
-    {% if error %}
-        <h2 style="color:red;">Error: {{ error }}</h2>
-    {% elif weather_model %}
-        <h3>Weather Details:</h3>
-        <p>Temperature: {{ weather_model.current_temperature }} °C</p>
-        <p>Humidity: {{ weather_model.current_humidity }} %</p>
-        <p>Wind Speed: {{ weather_model.current_wind_speed }} m/s</p>
-        <p>Precipitation Probability: {{ weather_model.current_precipitation_probability }} %</p>
-
-        {% if bad_weather %}
-            <h2 style="color:red;">The weather is bad!</h2>
-        {% else %}
-            <h2 style="color:green;">The weather is good!</h2>
-        {% endif %}
-    {% endif %}
-</body>
-  <script>
-    const citiesWithCoordinates = {{ cities | tojson }};
-
-    function configureCitySelect(str) {
-        const citySelect = document.getElementById(`${str}-city-select`);
-
-        const defaultCity = "Москва";
-        if (citiesWithCoordinates[defaultCity]) {
-          const [latitude, longitude] = citiesWithCoordinates[defaultCity];
-          document.getElementById(`${str}-latitude`).value = latitude;
-          document.getElementById(`${str}-longitude`).value = longitude;
+        .page-container {
+            position: relative;
+            overflow: hidden;
         }
 
-        citySelect.addEventListener('change', function() {
-          const selectedCity = citySelect.value;
-          console.log(`${str} city selected:`, selectedCity);
+        .sun-image {
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: auto;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+<div class="page-container relative">
+
+    <div class="flex justify-center items-center h-screen  flex-col p-10">
+        <div class="flex justify-center items-center flex-col flex-1 w-full">
+            <h1 class="text-5xl font-bold text-center mb-10 text-white">Погодо-Проверятель-3000</h1>
+                <form action="/" method="POST" class="flex flex-row justify-around items-center w-full">
+
+                    <div class="bg-white py-10 rounded-3xl shadow-md px-8 sm:px-32">
+                        <label for="orig-city-select" class="block text-xl font-semibold text-gray-700 mb-2">Откуда едем?</label>
+
+                        <div class="relative">
+                            <select id="orig-city-select" name="orig-city"  class="mt-1 block w-full py-3 px-4 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base">
+                                {% for city in cities.keys() %}
+                                    <option value="{{ city }}" {% if city == "Москва" %}selected{% endif %}>{{ city }}</option>
+                                {% endfor %}
+                            </select>
+
+                        </div>
+
+                        <div class="flex justify-center items-center my-6">
+                            <span class="bg-gray-200 h-px flex-1"></span>
+                            <span class="text-gray-500 px-4 text-sm font-semibold">или</span>
+                            <span class="bg-gray-200 h-px flex-1"></span>
+                        </div>
+
+                        <label for="orig-latitude" class="block text-sm font-medium text-gray-700 mb-1">Широта:</label>
+                        <input type="text" id="orig-latitude" name="orig-latitude" class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base" placeholder="Введите широту">
+
+                        <label for="orig-longitude" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Долгота:</label>
+                        <input type="text" id="orig-longitude" name="orig-longitude" class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base" placeholder="Введите долготу">
+                    </div>
 
 
-          if (selectedCity && citiesWithCoordinates[selectedCity]) {
-            const [latitude, longitude] = citiesWithCoordinates[selectedCity];
+                    <div class="flex flex-col justify-center items-center">
+                        <img src="/static/wavy_arrow.png" alt="Wavy arrow" class="w-[500px] h-[100px] my-auto">
+                        <button class="bg-white hover:bg-gray-200 text-black text-2xl font-bold rounded-full mt-16 py-8 px-20" type="submit">Проверить</button>
+                    </div>
+
+
+                <div class="bg-white py-10 rounded-3xl shadow-md px-8 sm:px-32">
+                        <label for="dest-city-select" class="block text-xl font-semibold text-gray-700 mb-2">Куда едем?</label>
+
+                        <div class="relative">
+                            <select id="dest-city-select" name="dest-city"  class="mt-1 block w-full py-3 px-4 border border-gray-300 bg-white rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base">
+                                {% for city in cities.keys() %}
+                                    <option value="{{ city }}" {% if city == "Москва" %}selected{% endif %}>{{ city }}</option>
+                                {% endfor %}
+                            </select>
+
+                        </div>
+
+                        <div class="flex justify-center items-center my-6">
+                            <span class="bg-gray-200 h-px flex-1"></span>
+                            <span class="text-gray-500 px-4 text-sm font-semibold">или</span>
+                            <span class="bg-gray-200 h-px flex-1"></span>
+                        </div>
+
+                        <label for="dest-latitude" class="block text-sm font-medium text-gray-700 mb-1">Широта:</label>
+                        <input type="text" id="dest-latitude" name="dest-latitude" class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base" placeholder="Введите широту">
+
+                        <label for="dest-longitude" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Долгота:</label>
+                        <input type="text" id="dest-longitude" name="dest-longitude" class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base" placeholder="Введите долготу">
+                    </div>
+
+                </form>
+        </div>
+
+        {%  if origin_weather or destination_weather or origin_weather_error or destination_weather_error %}
+        <div class="flex flex-1 justify-around flex-row w-full text-2xl my-5">
+            <div class="flex flex-1 flex-col text-white items-center bg-opacity-70 bg-blue-500 rounded-lg shadow-lg p-6 mx-20" style="backdrop-filter: blur(10px);">
+                {% if origin_weather_error %}
+                    <h2 class="text-2xl font-semibold text-red-800">Произошла ошибка: {{ origin_weather_error }}</h2>
+                {% elif origin_weather %}
+                    <h2 class="text-4xl font-bold mb-5">Погода в месте отправления</h2>
+
+                    {% if origin_weather.is_bad_weather %}
+                        <h1 class="text-5xl font-bold text-red-800 _animate-pulse">Не лучшая</h1>
+                    {% else %}
+                        <h1 class="text-5xl font-bold text-green-400 _animate-pulse">Отличная!</h1>
+                    {% endif %}
+
+                    <div class="flex flex-col gap-4 mt-10 p-4 bg-opacity-60 bg-white rounded-lg shadow-inner w-full max-w-md">
+                        <h3 class="text-3xl font-semibold text-gray-900">Подробнее:</h3>
+                        <p class="text-lg font-medium text-gray-800">Температура: <span class="font-bold text-blue-600">{{ origin_weather.temperature }} °C</span></p>
+                        <p class="text-lg font-medium text-gray-800">Влажность: <span class="font-bold text-blue-600">{{ origin_weather.humidity }} %</span></p>
+                        <p class="text-lg font-medium text-gray-800">Скорость ветра: <span class="font-bold text-blue-600">{{ origin_weather.wind_speed }} m/s</span></p>
+                        <p class="text-lg font-medium text-gray-800">Вероятность осадков: <span class="font-bold text-blue-600">{{ origin_weather.precipitation_probability }} %</span></p>
+                    </div>
+
+                {% endif %}
+            </div>
+            <div class="flex flex-1 flex-col text-white items-center bg-opacity-70 bg-blue-500 rounded-lg shadow-lg p-6 mx-20" style="backdrop-filter: blur(10px);">
+                {% if destination_weather_error %}
+                    <h2 class="text-2xl font-semibold text-red-800">Произошла ошибка: {{ destination_weather_error }}</h2>
+                {% elif destination_weather %}
+                    <h2 class="text-4xl font-bold mb-5">Погода в месте назначения</h2>
+
+                    {% if destination_weather.is_bad_weather %}
+                        <h1 class="text-5xl font-bold text-red-800 _animate-pulse">Не лучшая</h1>
+                    {% else %}
+                        <h1 class="text-5xl font-bold text-green-400 _animate-pulse">Отличная!</h1>
+                    {% endif %}
+
+                    <div class="flex flex-col gap-4 mt-10 p-4 bg-opacity-60 bg-white rounded-lg shadow-inner w-full max-w-md">
+                        <h3 class="text-3xl font-semibold text-gray-900">Подробнее:</h3>
+                        <p class="text-lg font-medium text-gray-800">Температура: <span class="font-bold text-blue-600">{{ destination_weather.temperature }} °C</span></p>
+                        <p class="text-lg font-medium text-gray-800">Влажность: <span class="font-bold text-blue-600">{{ destination_weather.humidity }} %</span></p>
+                        <p class="text-lg font-medium text-gray-800">Скорость ветра: <span class="font-bold text-blue-600">{{ destination_weather.wind_speed }} m/s</span></p>
+                        <p class="text-lg font-medium text-gray-800">Вероятность осадков: <span class="font-bold text-blue-600">{{ destination_weather.precipitation_probability }} %</span></p>
+                    </div>
+
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <img src="/static/sun.png" alt="Sun" class="sun-image">
+</div>
+
+{#<a href="https://www.flaticon.com/free-icons/summer" title="summer icons">Summer icons created by Freepik - Flaticon</a>#}
+{#<a href="https://www.flaticon.com/free-icons/clear-sky" title="clear sky icons">Clear sky icons created by kosonicon - Flaticon</a>#}
+
+</body>
+
+
+<script defer>
+    const citiesWithCoordinates = {{ cities | tojson }};
+
+    const origCity = "{{ form_data.orig_city }}";
+    const origLatitude = "{{ form_data.orig_latitude }}";
+    const origLongitude = "{{ form_data.orig_longitude }}";
+    const destCity = "{{ form_data.dest_city }}";
+    const destLatitude = "{{ form_data.dest_latitude }}";
+    const destLongitude = "{{ form_data.dest_longitude }}";
+
+
+    function configureCitySelect(str, selectedCity, latitude, longitude) {
+        const citySelect = document.getElementById(`${str}-city-select`);
+
+        if (selectedCity && citiesWithCoordinates[selectedCity]) {
+            console.log("Setting retrieved data", selectedCity, citiesWithCoordinates[selectedCity]);
+            document.getElementById(`${str}-city-select`).value = selectedCity;
             document.getElementById(`${str}-latitude`).value = latitude;
             document.getElementById(`${str}-longitude`).value = longitude;
-          } else {
-            document.getElementById(`${str}-latitude`).value = '';
-            document.getElementById(`${str}longitude`).value = '';
-          }
+        } else {
+            const defaultCity = "Москва";
+            const [defaultLat, defaultLon] = citiesWithCoordinates[defaultCity];
+            document.getElementById(`${str}-latitude`).value = defaultLat;
+            document.getElementById(`${str}-longitude`).value = defaultLon;
+        }
+
+        citySelect.addEventListener('change', function () {
+            const selectedCity = citySelect.value;
+            if (selectedCity && citiesWithCoordinates[selectedCity]) {
+                const [latitude, longitude] = citiesWithCoordinates[selectedCity];
+                document.getElementById(`${str}-latitude`).value = latitude;
+                document.getElementById(`${str}-longitude`).value = longitude;
+            } else {
+                document.getElementById(`${str}-latitude`).value = '';
+                document.getElementById(`${str}-longitude`).value = '';
+            }
+        });
+
+        document.getElementById(`${str}-latitude`).addEventListener('input', function () {
+            citySelect.value = "Другая локация";
+        });
+
+        document.getElementById(`${str}-longitude`).addEventListener('input', function () {
+            citySelect.value = "Другая локация";
         });
     }
-    configureCitySelect("orig");
-    configureCitySelect("dest");
 
+    configureCitySelect("orig", origCity, origLatitude, origLongitude);
+    configureCitySelect("dest", destCity, destLatitude, destLongitude);
   </script>
 </html>
