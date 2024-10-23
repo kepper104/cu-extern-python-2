@@ -57,7 +57,7 @@
                             <label for="orig-city-search-input">Название Города</label>
                             <input type="text" placeholder="Искомый город" id="orig-city-search-input"
                                    name="orig-city-search-input"
-                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base">
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base _bg-red-500">
                             <div id="orig-city-search-error" class="mt-2 text-sm text-red-500"></div>
                         </div>
 
@@ -117,7 +117,7 @@
                             <label for="dest-city-search-input">Название Города</label>
                             <input type="text" placeholder="Искомый город" id="dest-city-search-input"
                                    name="dest-city-search-input"
-                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300">
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 _bg-red-500">
                             <div id="dest-city-search-error" class="mt-2 text-sm text-red-500"></div>
                         </div>
 
@@ -157,7 +157,7 @@
                         <h2 class="text-2xl font-semibold text-red-800">{% if origin_weather_error['reason'] %}
                             {{ origin_weather_error.reason }} {% else %}  {{ origin_weather_error }} {% endif %}</h2>
                     {% elif origin_weather %}
-                        <h2 class="text-4xl font-bold mb-5">Погода в месте отправления</h2>
+                        <h2 class="text-4xl font-bold mb-5">Погода в городе отправления</h2>
 
                         {% if origin_weather.is_bad_weather %}
                             <h1 class="text-5xl font-bold text-red-800 _animate-pulse">Не лучшая</h1>
@@ -185,7 +185,7 @@
                     {% if destination_weather_error %}
                         <h2 class="text-2xl font-semibold text-red-800">{{ destination_weather_error }}</h2>
                     {% elif destination_weather %}
-                        <h2 class="text-4xl font-bold mb-5">Погода в месте назначения</h2>
+                        <h2 class="text-4xl font-bold mb-5">Погода в городе назначения</h2>
 
                         {% if destination_weather.is_bad_weather %}
                             <h1 class="text-5xl font-bold text-red-800 _animate-pulse">Не лучшая</h1>
@@ -212,7 +212,8 @@
         {% endif %}
         <a href="https://www.flaticon.com/free-icons/summer" title="summer icons" class="text-white mr-auto text-sm">Summer
             icons created by Freepik - Flaticon</a>
-        <a href="https://www.flaticon.com/free-icons/clear-sky" title="clear sky icons" class="text-white mr-auto text-sm">Clear
+        <a href="https://www.flaticon.com/free-icons/clear-sky" title="clear sky icons"
+           class="text-white mr-auto text-sm">Clear
             sky icons created by kosonicon - Flaticon</a>
 
     </div>
@@ -245,36 +246,55 @@
     /**
      * Handles city search for the specified input field.
      * @param event - event object
-     * @param str - string representing the input field
+     * @param routePoint - string representing the input field
      */
-    function handleCitySearch(event, str) {
+    function handleCitySearch(event, routePoint) {
         const searchQuery = event.target.value;
         if (searchQuery === '') {
             return;
         }
 
-        console.log('Searching for:', searchQuery);
-
         fetch('/get_city_coordinates?city_name=' + searchQuery)
             .then(response => response.json())
             .then(data => {
-                console.log('Received coordinates:', data);
-
-                document.getElementById(`${str}-latitude`).value = data[0];
-                document.getElementById(`${str}-longitude`).value = data[1];
-
-                document.getElementById(`${str}-city-search-input`).className = "block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base";
-                document.getElementById(`${str}-city-search-error`).innerHTML = "";
-
-
-                validateCoordinates()
+                setSearchedLocation(data, routePoint)
             })
             .catch(error => {
-                console.error('Error:', error);
-                document.getElementById(`${str}-city-search-input`).className += " bg-red-500";
-                document.getElementById(`${str}-city-search-error`).innerHTML = "Упс! Место не найдено...";
-                validateCoordinates()
+                setSearchError(routePoint, error)
             });
+    }
+
+
+    /**
+     * Show an error for the geocoding search for routePoint
+     *
+     * @param routePoint
+     * @param error
+     */
+    function setSearchError(routePoint, error) {
+        console.warn('Ошибка, город не найден!');
+        document.getElementById(`${routePoint}-city-search-input`).className =
+            document.getElementById(`${routePoint}-city-search-input`).className.replace(" _bg-red-500", " bg-red-500")
+        document.getElementById(`${routePoint}-city-search-error`).innerHTML = "Упс! Город не найдено...";
+
+        validateCoordinates()
+    }
+
+    /**
+     * Set successfully retrieved location data to the searched fields
+     *
+     * @param data
+     * @param routePoint
+     */
+    function setSearchedLocation(data, routePoint) {
+        document.getElementById(`${routePoint}-latitude`).value = data[0];
+        document.getElementById(`${routePoint}-longitude`).value = data[1];
+
+        document.getElementById(`${routePoint}-city-search-input`).className =
+            document.getElementById(`${routePoint}-city-search-input`).className.replace(" bg-red-500", " _bg-red-500")
+        document.getElementById(`${routePoint}-city-search-error`).innerHTML = "";
+
+        validateCoordinates()
     }
 
     /**
@@ -293,131 +313,136 @@
      * Validates the coordinates entered by the user.
      */
     function validateCoordinates() {
-        const submitButton = document.getElementById("submit-button");
-        submitButton.disabled = false;
-        submitButton.title = ""
-
-        if (checkCoordinatesValidity('orig') && checkCoordinatesValidity('dest')) {
-            submitButton.disabled = false;
-            submitButton.title = ""
-            return true
-        }
-        return false
+        toggleSubmitButton(true)
+        checkCoordinatesValidity("orig")
+        checkCoordinatesValidity("dest")
     }
 
     /**
      * Checks the validity of the coordinates entered by the user in the specified input fields.
-     * @param str - string representing the input field type: "orig" or "dest"
+     * @param routePoint - string representing the input field type: "orig" or "dest"
      * @return true if the coordinates are valid, false otherwise
      */
-    function checkCoordinatesValidity(str) {
-        const submitButton = document.getElementById("submit-button");
+    function checkCoordinatesValidity(routePoint) {
+        const latitudeElement = document.getElementById(`${routePoint}-latitude`)
+        const unparsedLatitudeValue = latitudeElement.value;
+        const latitudeValue = parseFloat(unparsedLatitudeValue);
+        // console.log(unparsedLatitudeValue, latitudeValue);
 
-        if (parseFloat(document.getElementById(`${str}-latitude`).value) < -90 ||
-            parseFloat(document.getElementById(`${str}-latitude`).value) > 90 || document.getElementById(`${str}-latitude`).value === "") {
-            submitButton.disabled = true;
-            submitButton.title = "Неверные координаты места отправления"
-        } else if (parseFloat(document.getElementById(`${str}-longitude`).value) < -180 ||
-            parseFloat(document.getElementById(`${str}-longitude`).value) > 180 || document.getElementById(`${str}-longitude`).value === "") {
-            submitButton.disabled = true;
-            submitButton.title = "Неверные координаты места назначения"
+        const longitudeElement = document.getElementById(`${routePoint}-longitude`)
+        const unparsedLongitudeValue = longitudeElement.value;
+        const longitudeValue = parseFloat(unparsedLongitudeValue);
+        // console.log(unparsedLongitudeValue, latitudeValue);
+
+
+        if (!unparsedLatitudeValue.match(/^-?[0-9]+(\.[0-9]+)?$/) ||
+            latitudeValue < -90 ||
+            latitudeValue > 90 ||
+            unparsedLatitudeValue === "" ||
+            Number.isNaN(latitudeValue)
+        ) {
+            latitudeElement.className = latitudeElement.className.replace(" _bg-red-500", " bg-red-500");
+            toggleSubmitButton(false)
         } else {
-            return true;
+            latitudeElement.className = latitudeElement.className.replace(" bg-red-500", " _bg-red-500");
         }
 
+        if (!unparsedLongitudeValue.match(/^-?[0-9]+(\.[0-9]+)?$/) ||
+            longitudeValue < -180 ||
+            longitudeValue > 180 ||
+            unparsedLongitudeValue === "" ||
+            Number.isNaN(longitudeValue)
+        ) {
+            longitudeElement.className = longitudeElement.className.replace(" _bg-red-500", " bg-red-500");
+            toggleSubmitButton(false)
+        } else {
+            longitudeElement.className = longitudeElement.className.replace(" bg-red-500", " _bg-red-500");
+        }
+
+    }
+
+    /**
+     * Toggles the submit button's disabled state.
+     * @param state - true to enable the button, false to disable it
+     */
+    function toggleSubmitButton(state) {
+        const submitButton = document.getElementById("submit-button");
+
+        submitButton.disabled = !state;
     }
 
 
     /**
      * Configures the city select for the specified input field.
-     * @param str - string representing the input field
+     * @param routePoint - string representing the input field
      * @param selectedCity - selected city
      * @param latitude - latitude of the selected city
      * @param longitude - longitude of the selected city
      * @param searchedCity - searched city
      */
-    function configureCitySelect(str, selectedCity, latitude, longitude, searchedCity) {
-        const citySelect = document.getElementById(`${str}-city-select`);
+    function configureCitySelect(routePoint, selectedCity, latitude, longitude, searchedCity) {
+        const citySelect = document.getElementById(`${routePoint}-city-select`);
 
         if (selectedCity === "CitySearch") {
-            const citySearch = document.getElementById(`${str}-city-search`);
+            const citySearch = document.getElementById(`${routePoint}-city-search`);
 
             citySearch.hidden = false;
-            document.getElementById(`${str}-city-select`).value = selectedCity;
-            document.getElementById(`${str}-city-search-input`).value = searchedCity;
-            document.getElementById(`${str}-latitude`).value = latitude;
-            document.getElementById(`${str}-longitude`).value = longitude;
+            document.getElementById(`${routePoint}-city-select`).value = selectedCity;
+            document.getElementById(`${routePoint}-city-search-input`).value = searchedCity;
+            document.getElementById(`${routePoint}-latitude`).value = latitude;
+            document.getElementById(`${routePoint}-longitude`).value = longitude;
         } else if (selectedCity && citiesWithCoordinates[selectedCity]) {
-            document.getElementById(`${str}-city-select`).value = selectedCity;
-            document.getElementById(`${str}-latitude`).value = latitude;
-            document.getElementById(`${str}-longitude`).value = longitude;
+            document.getElementById(`${routePoint}-city-select`).value = selectedCity;
+            document.getElementById(`${routePoint}-latitude`).value = latitude;
+            document.getElementById(`${routePoint}-longitude`).value = longitude;
         } else {
             const defaultCity = "Москва";
             const [defaultLat, defaultLon] = citiesWithCoordinates[defaultCity];
-            document.getElementById(`${str}-latitude`).value = defaultLat;
-            document.getElementById(`${str}-longitude`).value = defaultLon;
+            document.getElementById(`${routePoint}-latitude`).value = defaultLat;
+            document.getElementById(`${routePoint}-longitude`).value = defaultLon;
         }
 
         citySelect.addEventListener('change', function () {
             const selectedCity = citySelect.value;
-            const citySearch = document.getElementById(`${str}-city-search`);
+            const citySearch = document.getElementById(`${routePoint}-city-search`);
 
             if (selectedCity === "CitySearch") {
                 citySearch.hidden = false;
-                document.getElementById(`${str}-latitude`).value = '';
-                document.getElementById(`${str}-longitude`).value = '';
+                document.getElementById(`${routePoint}-latitude`).value = '';
+                document.getElementById(`${routePoint}-longitude`).value = '';
 
             } else {
                 citySearch.hidden = true;
                 if (selectedCity && citiesWithCoordinates[selectedCity]) {
                     const [latitude, longitude] = citiesWithCoordinates[selectedCity];
-                    document.getElementById(`${str}-latitude`).value = latitude;
-                    document.getElementById(`${str}-longitude`).value = longitude;
+                    document.getElementById(`${routePoint}-latitude`).value = latitude;
+                    document.getElementById(`${routePoint}-longitude`).value = longitude;
                 } else {
-                    document.getElementById(`${str}-latitude`).value = '';
-                    document.getElementById(`${str}-longitude`).value = '';
+                    document.getElementById(`${routePoint}-latitude`).value = '';
+                    document.getElementById(`${routePoint}-longitude`).value = '';
                 }
             }
             validateCoordinates()
         });
 
 
-        document.getElementById(`${str}-latitude`).addEventListener('input', function () {
-            let thisStr = this.value.toString();
-
-            if(!thisStr.match(/^-?[0-9]+(\.[0-9]+)?$/) || !validateCoordinates()) {
-                this.className = this.className.replace(" _bg-red-500", " bg-red-500");
-            } else {
-                this.className = this.className.replace(" bg-red-500", " _bg-red-500");
-            }
-
-
+        document.getElementById(`${routePoint}-latitude`).addEventListener('input', function () {
             validateCoordinates();
 
 
             citySelect.value = "Другая локация";
-            document.getElementById(`${str}-city-search`).hidden = true;
-            document.getElementById(`${str}-city-search-input`).value = "";
+            document.getElementById(`${routePoint}-city-search`).hidden = true;
+            document.getElementById(`${routePoint}-city-search-input`).value = "";
         });
 
-        document.getElementById(`${str}-longitude`).addEventListener('input', function () {
-            let thisStr = this.value.toString();
-
-            if(!thisStr.match(/^-?[0-9]+(\.[0-9]+)?$/) || !validateCoordinates()) {
-                this.className = this.className.replace(" _bg-red-500", " bg-red-500");
-            } else {
-                this.className = this.className.replace(" bg-red-500", " _bg-red-500");
-            }
-
-
+        document.getElementById(`${routePoint}-longitude`).addEventListener('input', function () {
             validateCoordinates();
 
-
             citySelect.value = "Другая локация";
-            document.getElementById(`${str}-city-search`).hidden = true;
-            document.getElementById(`${str}-city-search-input`).value = "";
+            document.getElementById(`${routePoint}-city-search`).hidden = true;
+            document.getElementById(`${routePoint}-city-search-input`).value = "";
         });
-        }
+    }
 
 
     const citiesWithCoordinates = {{ cities | tojson }};
