@@ -74,14 +74,14 @@
                             <label for="orig-latitude"
                                    class="block text-sm font-medium text-gray-700 mb-1">Широта</label>
                             <input type="text" id="orig-latitude" name="orig-latitude"
-                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 _bg-red-500"
                                    placeholder="Введите широту">
                         </div>
                         <div class="flex flex-col">
                             <label for="orig-longitude"
                                    class="block text-sm font-medium text-gray-700 mb-1">Долгота</label>
                             <input type="text" id="orig-longitude" name="orig-longitude"
-                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300"
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 _bg-red-500"
                                    placeholder="Введите долготу">
                         </div>
 
@@ -134,14 +134,14 @@
                             <label for="dest-latitude"
                                    class="block text-sm font-medium text-gray-700 mb-1">Широта</label>
                             <input type="text" id="dest-latitude" name="dest-latitude"
-                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 _bg-red-500"
                                    placeholder="Введите широту">
                         </div>
                         <div class="flex flex-col">
                             <label for="dest-longitude"
                                    class="block text-sm font-medium text-gray-700 mb-1">Долгота</label>
                             <input type="text" id="dest-longitude" name="dest-longitude"
-                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base"
+                                   class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 _bg-red-500"
                                    placeholder="Введите долготу">
                         </div>
                     </div>
@@ -212,11 +212,8 @@
         {% endif %}
         <a href="https://www.flaticon.com/free-icons/summer" title="summer icons" class="text-white mr-auto text-sm">Summer
             icons created by Freepik - Flaticon</a>
-        <div class="flex w-full flex-row justify-between">
-            <a href="https://www.flaticon.com/free-icons/clear-sky" title="clear sky icons" class="text-white text-sm">Clear
-                sky icons created by kosonicon - Flaticon</a>
-            <div class="text-white">Сайт адаптирован под 1920x1080 ;)</div>
-        </div>
+        <a href="https://www.flaticon.com/free-icons/clear-sky" title="clear sky icons" class="text-white mr-auto text-sm">Clear
+            sky icons created by kosonicon - Flaticon</a>
 
     </div>
 
@@ -303,7 +300,9 @@
         if (checkCoordinatesValidity('orig') && checkCoordinatesValidity('dest')) {
             submitButton.disabled = false;
             submitButton.title = ""
+            return true
         }
+        return false
     }
 
     /**
@@ -384,14 +383,16 @@
 
 
         document.getElementById(`${str}-latitude`).addEventListener('input', function () {
-            this.value = this.value.replace(/[^0-9.]/g, '');
+            let thisStr = this.value.toString();
 
-            const parts = this.value.split('.');
-            if (parts.length > 2) {
-                this.value = parts[0] + '.' + parts[1];
+            if(!thisStr.match(/^-?[0-9]+(\.[0-9]+)?$/) || !validateCoordinates()) {
+                this.className = this.className.replace(" _bg-red-500", " bg-red-500");
+            } else {
+                this.className = this.className.replace(" bg-red-500", " _bg-red-500");
             }
 
-            validateCoordinates()
+
+            validateCoordinates();
 
 
             citySelect.value = "Другая локация";
@@ -400,21 +401,23 @@
         });
 
         document.getElementById(`${str}-longitude`).addEventListener('input', function () {
-            this.value = this.value.replace(/[^0-9.]/g, '');
+            let thisStr = this.value.toString();
 
-            const parts = this.value.split('.');
-            if (parts.length > 2) {
-                this.value = parts[0] + '.' + parts[1];
+            if(!thisStr.match(/^-?[0-9]+(\.[0-9]+)?$/) || !validateCoordinates()) {
+                this.className = this.className.replace(" _bg-red-500", " bg-red-500");
+            } else {
+                this.className = this.className.replace(" bg-red-500", " _bg-red-500");
             }
 
-            validateCoordinates()
+
+            validateCoordinates();
 
 
             citySelect.value = "Другая локация";
             document.getElementById(`${str}-city-search`).hidden = true;
             document.getElementById(`${str}-city-search-input`).value = "";
         });
-    }
+        }
 
 
     const citiesWithCoordinates = {{ cities | tojson }};
