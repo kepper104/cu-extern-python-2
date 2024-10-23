@@ -36,8 +36,8 @@ class WeatherModel:
     """
 
     def __init__(self, lat: float, lon: float,
-                 min_comfortable_temperature: float = 10, max_comfortable_temperature: float = 30,
-                 min_comfortable_humidity: float = 30, max_comfortable_humidity: float = 70,
+                 min_comfortable_temperature: float = 8, max_comfortable_temperature: float = 30,
+                 min_comfortable_humidity: float = 30, max_comfortable_humidity: float = 80,
                  max_wind_speed: float = 40, max_precipitation_probability: float = 50):
 
         self.lat = lat
