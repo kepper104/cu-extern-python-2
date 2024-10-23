@@ -67,7 +67,8 @@ def index():
 
         except Exception as e:
             print("Error!", e)
-            return "Был сделан некорректный POST запрос. Попробуйте вернуться на <a href='/'> главную страницу </a> и повторите попытку."
+            return "Был сделан некорректный POST запрос. \
+            Попробуйте вернуться на <a href='/'> главную страницу </a> и повторите попытку."
 
         return_form_data = {"origin_city": origin_city, "origin_latitude": origin_latitude,
                             "origin_longitude": origin_longitude,
@@ -111,7 +112,8 @@ def index():
                                destination_weather_error=weather_model_destination.error
                                )
     else:
-        return "Был сделан неизвестный запрос. Попробуйте вернуться на <a href='/'> главную страницу </a> и повторите попытку."
+        return "Был сделан неизвестный запрос. \
+        Попробуйте вернуться на <a href='/'> главную страницу </a> и повторите попытку."
 
 
 if __name__ == '__main__':

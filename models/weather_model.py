@@ -66,7 +66,8 @@ class WeatherModel:
         :return: None
         """
         base_url = "https://api.open-meteo.com/v1/forecast"
-        request_query = f'?latitude={self.lat}&longitude={self.lon}&current=temperature_2m,relative_humidity_2m,precipitation_probability,wind_speed_10m'
+        request_query = (f'?latitude={self.lat}&longitude={self.lon}'
+                         f'&current=temperature_2m,relative_humidity_2m,precipitation_probability,wind_speed_10m')
 
         try:
             response = requests.get(base_url + request_query)
