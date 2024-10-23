@@ -58,6 +58,7 @@
                             <input type="text" placeholder="Искомый город" id="orig-city-search-input"
                                    name="orig-city-search-input"
                                    class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base">
+                            <div id="orig-city-search-error" class="mt-2 text-sm text-red-500"></div>
                         </div>
 
                     </div>
@@ -117,6 +118,7 @@
                             <input type="text" placeholder="Искомый город" id="dest-city-search-input"
                                    name="dest-city-search-input"
                                    class="block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300">
+                            <div id="dest-city-search-error" class="mt-2 text-sm text-red-500"></div>
                         </div>
 
                     </div>
@@ -265,6 +267,7 @@
                 document.getElementById(`${str}-longitude`).value = data[1];
 
                 document.getElementById(`${str}-city-search-input`).className = "block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base";
+                document.getElementById(`${str}-city-search-error`).innerHTML = "";
 
 
                 validateCoordinates()
@@ -272,6 +275,7 @@
             .catch(error => {
                 console.error('Error:', error);
                 document.getElementById(`${str}-city-search-input`).className += " bg-red-500";
+                document.getElementById(`${str}-city-search-error`).innerHTML = "Упс! Место не найдено...";
                 validateCoordinates()
             });
     }
