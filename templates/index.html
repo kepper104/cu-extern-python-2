@@ -267,11 +267,12 @@
                 document.getElementById(`${str}-city-search-input`).className = "block w-full py-3 px-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-300 sm:text-base";
 
 
-                checkCoordinatesValidity(str)
+                validateCoordinates()
             })
             .catch(error => {
                 console.error('Error:', error);
                 document.getElementById(`${str}-city-search-input`).className += " bg-red-500";
+                validateCoordinates()
             });
     }
 
